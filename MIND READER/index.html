@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mind Reader</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --input-bg: #ffffff;
+      --input-text: #000000;
+    }
+
+    body.dark {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --input-bg: #1e1e1e;
+      --input-text: #ffffff;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 20px;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+    h1 {
+      font-size: 5rem;
+      margin-bottom: 30px;
+    }
+    h2 {
+      font-size: 3rem;
+    }
+    input {
+      padding: 14px;
+      font-size: 1.4rem;
+      margin: 10px;
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border: 2px solid #888;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 14px 18px;
+      font-size: 1.3rem;
+      margin: 10px;
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border: 2px solid #555;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #444;
+      color: #fff;
+    }
+    #loading, #result {
+      display: none;
+      margin-top: 20px;
+    }
+    .loading-text {
+      font-size: 2.2rem;
+      margin: 5px 0;
+      min-height: 2em;
+      transition: opacity 0.3s ease;
+    }
+    .blast {
+      margin-top: 20px;
+    }
+    .blast img {
+      width: 300px;
+      height: auto;
+    }
+    #toggleTheme {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border: 1px solid #555;
+      padding: 6px 10px;
+      cursor: pointer;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="dark">
+  <button id="toggleTheme" onclick="toggleTheme()">Toggle Light Mode</button>
+  <h1>I CAN TELL YOU THE NUMBER YOU ARE THINKING</h1>
+  <input type="number" id="userNumber" placeholder="Enter a number" />
+  <button id="readButton" onclick="readMind()">Read My Mind</button>
+
+  <div id="loading">
+    <div class="loading-text" id="loadingText">Initializing...</div>
+  </div>
+
+  <div id="result">
+    <div class="blast"><img src="explosion.gif" alt="Explosion"></div>
+    <h2>You were thinking of: <span id="revealedNumber"></span></h2>
+    <button onclick="resetMind()">Try Again</button>
+  </div>
+
+  <script>
+    const messages = [
+      "HACKING YOUR NEURALINK...",
+      "ACCESSING SUBCONSCIOUS...",
+      "CALIBRATING BRAINWAVES...",
+      "USING ADVANCED ALGORITHM...",
+      "DEEP MIND DIVE INITIATED...",
+      "ANALYZING...",
+      "REVEALING THE NUMBER...",
+      "DIVING INTO THOUGHT MATRIX...",
+      "APPLYING PSYCHIC PRESSURE...",
+      "OVERCLOCKING INTUITION CORE...",
+      "LOADING TELEPATHY LIBRARY...",
+      "SCANNING BRAIN NODES..."
+    ];
+
+    let interval;
+
+    function readMind() {
+      const number = document.getElementById("userNumber").value;
+      if (!number) return alert("Enter a number first!");
+
+      document.getElementById("userNumber").style.display = "none";
+      document.getElementById("readButton").style.display = "none";
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("toggleTheme").style.display = "block";
+
+      let i = 0;
+      document.getElementById("loadingText").innerText = messages[0];
+      interval = setInterval(() => {
+        i++;
+        document.getElementById("loadingText").style.opacity = 0;
+        setTimeout(() => {
+          document.getElementById("loadingText").innerText = messages[i % messages.length];
+          document.getElementById("loadingText").style.opacity = 1;
+        }, 300);
+      }, 2000);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("result").style.display = "block";
+        document.getElementById("revealedNumber").innerText = number;
+        document.getElementById("toggleTheme").style.display = "block";
+      }, 10000);
+    }
+
+    function resetMind() {
+      document.getElementById("userNumber").value = "";
+      document.getElementById("userNumber").style.display = "inline-block";
+      document.getElementById("readButton").style.display = "inline-block";
+      document.getElementById("result").style.display = "none";
+      document.getElementById("loadingText").innerText = "Initializing...";
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle("dark");
+      const btn = document.getElementById("toggleTheme");
+      btn.innerText = body.classList.contains("dark") ? "Toggle Light Mode" : "Toggle Dark Mode";
+    }
+  </script>
+</body>
+</html>
