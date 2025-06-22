@@ -1,5 +1,5 @@
 🧠 Real-Time Mind Reader – Neuralink-Compatible Thought Scanner
-“I CAN TELL YOU THE NUMBER YOU ARE THINKING.”
+
 This cutting-edge web app uses advanced neurocognitive interface spoofing to simulate real-time thought extraction through your device. No plugins. No downloads. Just pure brainwave decoding.
 
 ⚙️ How it works:
