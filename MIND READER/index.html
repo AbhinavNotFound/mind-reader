@@ -1,176 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mind Reader</title>
-  <style>
-    :root {
-      --bg-color: #ffffff;
-      --text-color: #000000;
-      --input-bg: #ffffff;
-      --input-text: #000000;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mind Reader</title>
+<style>
+  /* Theme variables */
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --input-bg: #ffffff;
+    --input-text: #000000;
+  }
+  body.dark {
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --input-bg: #1e1e1e;
+    --input-text: #ffffff;
+  }
 
-    body.dark {
-      --bg-color: #121212;
-      --text-color: #ffffff;
-      --input-bg: #1e1e1e;
-      --input-text: #ffffff;
-    }
+  /* Basic page styles */
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 20px;
+    transition: background-color 0.5s ease, color 0.5s ease, transform 5s linear;
+    overflow: hidden;
+    margin: 0;
+    position: relative;
+  }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      font-family: monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-      padding: 20px;
-      transition: background-color 0.5s ease, color 0.5s ease;
-    }
-    h1 {
-      font-size: 5rem;
-      margin-bottom: 30px;
-    }
-    h2 {
-      font-size: 3rem;
-    }
-    input {
-      padding: 14px;
-      font-size: 1.4rem;
-      margin: 10px;
-      background-color: var(--input-bg);
-      color: var(--input-text);
-      border: 2px solid #888;
-      border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    }
-    button {
-      padding: 14px 18px;
-      font-size: 1.3rem;
-      margin: 10px;
-      background-color: var(--input-bg);
-      color: var(--input-text);
-      border: 2px solid #555;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #444;
-      color: #fff;
-    }
-    #loading, #result {
-      display: none;
-      margin-top: 20px;
-    }
-    .loading-text {
-      font-size: 2.2rem;
-      margin: 5px 0;
-      min-height: 2em;
-      transition: opacity 0.3s ease;
-    }
-    .blast {
-      margin-top: 20px;
-    }
-    .blast img {
-      width: 300px;
-      height: auto;
-    }
-    #toggleTheme {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: var(--input-bg);
-      color: var(--input-text);
-      border: 1px solid #555;
-      padding: 6px 10px;
-      cursor: pointer;
-      z-index: 10;
-    }
-  </style>
+  h1 {
+    font-size: 4rem;
+    margin: 18px 0;
+  }
+
+  input {
+    padding: 14px;
+    font-size: 1.4rem;
+    margin: 8px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    border: 2px solid #888;
+    border-radius: 12px;
+    width: 300px;
+    max-width: 90vw;
+  }
+
+  button {
+    padding: 12px 18px;
+    font-size: 1.2rem;
+    margin: 8px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    border: 2px solid #555;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  #toggleTheme {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 10px;
+    z-index: 100;
+  }
+
+  #loading,
+  #result {
+    display: none;
+    margin-top: 20px;
+  }
+
+  .loading-text {
+    font-size: 1.8rem;
+    min-height: 2em;
+    transition: opacity 0.4s;
+  }
+
+  .blast img {
+    width: 220px;
+    max-width: 35vw;
+    height: auto;
+    cursor: pointer;
+  }
+
+  #result button {
+    margin-top: 20px;
+  }
+
+  /* Floating or fixed overlays */
+  .floating {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9000;
+  }
+
+  .centered-egg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+  }
+</style>
 </head>
 <body class="dark">
-  <button id="toggleTheme" onclick="toggleTheme()">Toggle Light Mode</button>
-  <h1>I CAN TELL YOU THE NUMBER YOU ARE THINKING</h1>
-  <input type="number" id="userNumber" placeholder="Enter a number" />
-  <button id="readButton" onclick="readMind()">Read My Mind</button>
 
-  <div id="loading">
-    <div class="loading-text" id="loadingText">Initializing...</div>
+<!-- Theme toggle button -->
+<button id="toggleTheme" onclick="toggleTheme()">Light Mode</button>
+
+<h1>I CAN TELL THE NUMBER YOU ARE THINKING</h1>
+
+<!-- User input -->
+<input type="text" id="userNumber" placeholder="Enter a number" />
+
+<div><button id="readButton" onclick="readMind()">Read My Mind</button></div>
+
+<!-- Loading animation and messages -->
+<div id="loading">
+  <div class="loading-text" id="loadingText">Initializing...</div>
+</div>
+
+<!-- Result section -->
+<div id="result">
+  <div class="blast">
+    <img src="explosion.gif" alt="Explosion" />
   </div>
+  <h2 style="font-size: 3rem; margin-top: 20px">
+    You were thinking of: <span id="revealedNumber"></span>
+  </h2>
+  <button id="resetBtn" onclick="resetMind()">Reset</button>
+</div>
 
-  <div id="result">
-    <div class="blast"><img src="explosion.gif" alt="Explosion"></div>
-    <h2>You were thinking of: <span id="revealedNumber"></span></h2>
-    <button onclick="resetMind()">Try Again</button>
-  </div>
+<script>
+  // Preload assets
+  const preloadList = [
+    "Hammer_of_Justice_battle_laugh.gif",
+    "explosion.gif",
+    "amogus.png",
+    "shrek.jpg",
+    "bsod.png",
+    "jumpscare.png",
+    "pepe.png" 
+  ];
+  preloadList.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
 
-  <script>
-    const messages = [
-      "HACKING YOUR NEURALINK...",
-      "ACCESSING SUBCONSCIOUS...",
-      "CALIBRATING BRAINWAVES...",
-      "USING ADVANCED ALGORITHM...",
-      "DEEP MIND DIVE INITIATED...",
-      "ANALYZING...",
-      "REVEALING THE NUMBER...",
-      "DIVING INTO THOUGHT MATRIX...",
-      "APPLYING PSYCHIC PRESSURE...",
-      "OVERCLOCKING INTUITION CORE...",
-      "LOADING TELEPATHY LIBRARY...",
-      "SCANNING BRAIN NODES..."
-    ];
+  // Sounds (make sure these files exist)
+  const oldSound = new Audio("videoplayback (1).m4a");
+  oldSound.loop = true;
 
-    let interval;
+  // Fun messages for loading animation
+  const allMessages = [
+    "HACKING YOUR MIND...",
+    "HACKING YOUR NEURALINK...",
+    "ACCESSING SUBCONSCIOUS...",
+    "CALIBRATING BRAINWAVES...",
+    "USING ADVANCED ALGORITHM...",
+    "READING YOUR MIND...",
+    "DEEP MIND DIVE INITIATED...",
+    "CONNECTING TO THOUGHTS...",
+    "ANALYZING...",
+    "REVEALING THE NUMBER...",
+    "DIVING INTO THOUGHT MATRIX...",
+    "APPLYING PSYCHIC PRESSURE...",
+    "OVERLOCKING INTUITION CORE...",
+    "LOADING TELEPATHY LIBRARY...",
+    "SCANNING BRAIN NODES...",
+    "DEPLOYING MIND READER...",
+    "LINKING TO COSMIC MEMORY...",
+    "SNIFFING SYNAPSE SIGNALS...",
+    "MAGNETIZING MENTAL AURA...",
+    "UNLOCKING CEREBRAL CORE...",
+    "AMPLIFYING ESP SIGNAL...",
+    "CALCULATING THOUGHT FREQUENCY...",
+    "DECRYPTING MENTAL ENCRYPTION...",
+    "EXTRACTING THOUGHT DATA...",
+    "READING MIND PARTICLES...",
+    "TUNING EMOTIONAL RESONANCE...",
+    "SYNCHRONIZING THOUGHTSTREAM...",
+  ];
 
-    function readMind() {
-      const number = document.getElementById("userNumber").value;
-      if (!number) return alert("Enter a number first!");
+  // Special funny number alerts
+  const funnyNumbers = {
+    "69": "Nice 😏",
+    "420": "Blaze it 🔥",
+    "7": "Lucky number!",
+    "13": "Unlucky… or is it?"
+  };
 
-      document.getElementById("userNumber").style.display = "none";
-      document.getElementById("readButton").style.display = "none";
-      document.getElementById("loading").style.display = "block";
-      document.getElementById("toggleTheme").style.display = "block";
+  // Konami code for "Hacker Mode"
+  const konamiSequence = [38,38,40,40,37,39,37,39,66,65];
+  let konamiIndex = 0;
 
-      let i = 0;
-      document.getElementById("loadingText").innerText = messages[0];
-      interval = setInterval(() => {
-        i++;
-        document.getElementById("loadingText").style.opacity = 0;
-        setTimeout(() => {
-          document.getElementById("loadingText").innerText = messages[i % messages.length];
-          document.getElementById("loadingText").style.opacity = 1;
-        }, 300);
-      }, 2000);
+  // Listen for Konami code to enable hacker mode
+  window.addEventListener("keydown", e => {
+    if (e.keyCode === konamiSequence[konamiIndex]) {
+      konamiIndex++;
+      if (konamiIndex === konamiSequence.length) {
+        enableHackerMode();
+        konamiIndex = 0;
+      }
+    } else {
+      konamiIndex = 0;
+    }
+  });
 
+  // Enable Hacker Mode with green text on black background
+  function enableHackerMode() {
+    document.body.className = "";
+    document.body.style.background = "#000";
+    document.body.style.color = "lime";
+    document.body.innerHTML = `<pre style="padding:20px;font-size:1.1rem;">
+ACCESS GRANTED
+
+Welcome to Hacker Mode.
+
+All your thoughts belong to us...
+
+&gt; _
+</pre>`;
+  }
+
+  // Rotate page if 's' key pressed 5 times
+  let sCount = 0;
+  let spinInterval = null;
+  window.addEventListener("keydown", e => {
+    if (e.key && e.key.toLowerCase() === "s") {
+      sCount++;
+      if (sCount >= 5 && !spinInterval) {
+        spinInterval = setInterval(() => {
+          document.body.style.transform = `rotate(${(Date.now() / 20) % 360}deg)`;
+        }, 50);
+      }
+    }
+  });
+
+  // Show glitch failure effect
+  function glitchFail() {
+    document.body.className = "";
+    let times = 0;
+    const flick = setInterval(() => {
+      document.body.style.background = times % 2 === 0 ? "#000" : "#222";
+      document.body.style.color = times % 2 === 0 ? "#0F0" : "#FF0000";
+      times++;
+      if (times > 12) {
+        clearInterval(flick);
+        document.body.innerHTML = `
+          <div style="font-family:monospace;color:#fff;background:#000;height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column">
+            <div style="font-size:2rem;color:red">ERROR: BRAINWAVE INTERFERENCE DETECTED</div>
+            <div style="margin-top:12px">☠ Neural Sync Failed ☠</div>
+          </div>
+        `;
+        setTimeout(() => location.reload(), 2400);
+      }
+    }, 80);
+  }
+
+  // Small chance jumpscare effect
+  function maybeJumpscare() {
+    if (Math.random() < 0.01) {
+      const d = document.createElement("div");
+      d.style.position = "fixed";
+      d.style.inset = "0";
+      d.style.zIndex = 9999;
+      d.innerHTML = `<img src="jumpscare.png" style="width:100%;height:100%;object-fit:cover">`;
+      document.body.appendChild(d);
+      setTimeout(() => location.reload(), 900);
+      return true;
+    }
+    return false;
+  }
+
+  // Redirect to YouTube video by id
+  function redirectYouTube(id) {
+    window.open("https://www.youtube.com/watch?v=" + id, "_blank");
+  }
+
+  // Amogus slide animation
+  function amogusSlide() {
+    const el = document.createElement("div");
+    el.style.position = "fixed";
+    el.style.left = "-300px";
+    el.style.top = "40%";
+    el.style.zIndex = 9000;
+    el.innerHTML = `<img src="amogus.gif" style="height:180px">`;
+    document.body.appendChild(el);
+    el.animate(
+      [{ left: "-300px" }, { left: "110%" }],
+      { duration: 2200, iterations: 1, easing: "ease-in-out" }
+    );
+    setTimeout(() => el.remove(), 2400);
+  }
+
+  // Shrek mode background + redirect
+  function shrekMode() {
+    document.body.className = "";
+    document.body.style.background = "url('shrek.jpg') center/cover no-repeat";
+    document.body.style.color = "#fff";
+    document.body.innerHTML = `
+      <div style="padding:40px;font-family:monospace">
+        <h1>WELCOME TO THE SWAMP</h1>
+        <p>All Star will open in a new tab.</p>
+        <button onclick="location.reload()">Return</button>
+      </div>`;
+    redirectYouTube("L_jWHffIx5E");
+  }
+
+  // Show Blue Screen of Death
+  function showBSODTemp() {
+    const img = new Image();
+    img.onload = () => {
+      document.body.className = "";
+      document.body.innerHTML = `<img src="bsod.png" style="width:100%;height:100%;object-fit:cover">`;
+    };
+    img.onerror = () => {
+      document.body.className = "";
+      document.body.style.background = "#0100a1";
+      document.body.style.color = "#fff";
+      document.body.innerHTML = `
+        <div style="font-family:monospace;padding:20px;">
+          <h2>*** A problem has been detected and Windows has been shut down ***</h2>
+          <p>STOP: 0x00000404</p>
+        </div>`;
+    };
+    img.src = "bsod.png";
+    setTimeout(() => location.reload(), 2500);
+  }
+
+  // Creepy red text mode
+  function creepyMode() {
+    document.body.className = "";
+    document.body.style.background = "#000";
+    document.body.style.color = "red";
+    document.body.innerHTML = `
+      <div style="font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column">
+        <div style="font-size:2.6rem;color:red">He is watching you</div>
+        <div style="margin-top:12px;opacity:.9">...don't look behind the screen</div>
+      </div>`;
+    setTimeout(() => location.reload(), 3500);
+  }
+
+  // Pepe rain animation - fixed and simplified
+  function pepeRain() {
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+      const img = document.createElement("img");
+      img.src = "pepe.png"; // make sure pepe.png exists
+      img.style.position = "fixed";
+      img.style.left = `${Math.random() * 100}%`;
+      img.style.top = "-80px";
+      img.style.width = `${30 + Math.random() * 70}px`;
+      img.style.zIndex = 9000;
+      document.body.appendChild(img);
+
+      const duration = 3000 + Math.random() * 3000;
+
+      // Animate falling down
+      img.animate(
+        [{ transform: "translateY(0)" }, { transform: "translateY(120vh)" }],
+        { duration: duration, iterations: 1, easing: "linear" }
+      );
+
+      // Remove after animation
+      setTimeout(() => img.remove(), duration + 50);
+    }
+  }
+
+  // Variables for mind reading loading effect
+  let interval;
+  let currentMessages = [];
+  const loadingText = document.getElementById("loadingText");
+
+  // Read the mind based on user input
+  function readMind() {
+    const raw = document.getElementById("userNumber").value.trim();
+
+    if (!raw) {
+      alert("Enter a number or phrase first!");
+      return;
+    }
+
+    const lowered = raw.toLowerCase();
+
+    // Show funny alerts for special numbers
+    if (funnyNumbers[raw]) alert(funnyNumbers[raw]);
+
+    // Handle special phrases / numbers with unique effects
+    switch (lowered) {
+      case "help me":
+      case "helpme":
+        fakeTakeover();
+        return;
+      case "sus":
+        amogusSlide();
+        return;
+      case "old":
+        triggerOld();
+        return;
+      default:
+        break;
+    }
+
+    // Parse number for special effects
+    const num = parseInt(raw, 10);
+    if (!isNaN(num)) {
+      switch (num) {
+        case 1987:
+          redirectYouTube("dQw4w9WgXcQ"); // Rickroll
+          return;
+        case 1738:
+          redirectYouTube("i_kF4zLNKio");
+          return;
+        case 2001:
+          shrekMode();
+          return;
+        case 7777:
+          pepeRain();
+          return;
+        case 404:
+          showBSODTemp();
+          return;
+        case 666:
+        case 1313:
+          creepyMode();
+          return;
+      }
+    }
+
+    // Small chance glitch fail or jumpscare before "mind reading"
+    if (Math.random() < 0.05) {
+      glitchFail();
+      return;
+    }
+    if (maybeJumpscare()) return;
+
+    // Start "mind reading" animation
+    currentMessages = getRandomMessages(10);
+    let i = 0;
+
+    // Hide input and button, show loading
+    document.getElementById("userNumber").style.display = "none";
+    document.getElementById("readButton").style.display = "none";
+    document.getElementById("loading").style.display = "block";
+
+    loadingText.innerText = currentMessages[0];
+    loadingText.style.opacity = 1;
+
+    interval = setInterval(() => {
+      loadingText.style.opacity = 0;
       setTimeout(() => {
-        clearInterval(interval);
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("result").style.display = "block";
-        document.getElementById("revealedNumber").innerText = number;
-        document.getElementById("toggleTheme").style.display = "block";
-      }, 10000);
-    }
+        i++;
+        loadingText.innerText = currentMessages[i % currentMessages.length];
+        loadingText.style.opacity = 1;
+      }, 200);
+    }, 2000);
 
-    function resetMind() {
-      document.getElementById("userNumber").value = "";
-      document.getElementById("userNumber").style.display = "inline-block";
-      document.getElementById("readButton").style.display = "inline-block";
-      document.getElementById("result").style.display = "none";
-      document.getElementById("loadingText").innerText = "Initializing...";
-    }
+    // After 10 seconds, show the result
+    setTimeout(() => {
+      clearInterval(interval);
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("result").style.display = "block";
+      document.getElementById("revealedNumber").innerText = raw;
 
-    function toggleTheme() {
-      const body = document.body;
-      body.classList.toggle("dark");
-      const btn = document.getElementById("toggleTheme");
-      btn.innerText = body.classList.contains("dark") ? "Toggle Light Mode" : "Toggle Dark Mode";
-    }
-  </script>
+      // Occasionally trigger pepe rain or amogus slide after reveal
+      if (Math.random() < 0.15) pepeRain();
+      if (Math.random() < 0.12) amogusSlide();
+    }, 10000);
+  }
+
+  // Reset page to initial state
+  function resetMind() {
+    try {
+      oldSound.pause();
+      oldSound.currentTime = 0;
+    } catch (e) {}
+    location.reload();
+  }
+
+  // Utility: get random subset of messages
+  function getRandomMessages(n) {
+    return [...allMessages].sort(() => 0.5 - Math.random()).slice(0, n);
+  }
+
+  // Special effects for 'old' command
+  function triggerOld() {
+    document.body.innerHTML = `<img src="Hammer_of_Justice_battle_laugh.gif" class="centered-egg" id="oldImg">`;
+    oldSound.currentTime = 0;
+    oldSound.play();
+  }
+
+  // Fake AI takeover screen (called on "help me")
+  function fakeTakeover() {
+    document.body.className = "";
+    document.body.style.background = "#000";
+    document.body.style.color = "#0f0";
+    document.body.innerHTML = `<pre style="padding:20px;font-size:1rem">
+SYSTEM: INITIATING AI OVERRIDE
+
+> Loading neural override modules...
+> Linking to social graph...
+> Mining thoughts...
+
+Press F5 to escape.
+</pre>`;
+  }
+
+  // Theme toggle button logic
+  const toggleBtn = document.getElementById("toggleTheme");
+  function updateThemeButtonText() {
+    const isDark = document.body.classList.contains("dark");
+    toggleBtn.textContent = isDark ? "Light Mode" : "Dark Mode";
+  }
+  function toggleTheme() {
+    document.body.classList.toggle("dark");
+    updateThemeButtonText();
+  }
+  updateThemeButtonText();
+</script>
+
 </body>
 </html>
